@@ -2,13 +2,16 @@ package com.basic.springboot.service.posts;
 
 import com.basic.springboot.domain.posts.Posts;
 import com.basic.springboot.domain.posts.PostsRepository;
+import com.basic.springboot.web.dto.PostsListResponseDto;
 import com.basic.springboot.web.dto.PostsResponseDto;
 import com.basic.springboot.web.dto.PostsSaveRequestDto;
 import com.basic.springboot.web.dto.PostsUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -35,5 +38,20 @@ public class PostsService {
                 () -> new IllegalArgumentException("There is no post. id = "+id)
         );
         return new PostsResponseDto(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostsListResponseDto> findAllDesc() {
+        return postsRepository.findAllDesc().stream()
+                .map(PostsListResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Posts posts = postsRepository.findById(id).orElseThrow(
+                ()-> new IllegalArgumentException("There is no post. id = "+id)
+        );
+        postsRepository.delete(posts);
     }
 }
